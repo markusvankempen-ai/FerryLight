@@ -1,0 +1,48 @@
+# FerryLightV2 Git Ignore
+
+# Credentials and sensitive files
+CREDENTIALS.md
+SECURITY_SUMMARY.md
+*.env
+.env.local
+.env.production
+
+# SSL certificates and keys
+traefik/acme/
+*.pem
+*.key
+*.crt
+
+# Database files
+postgres/data/
+pgadmin/
+
+# Logs
+*.log
+logs/
+
+# Backup files
+backups/
+*.backup
+*.sql
+*.sql.gz
+
+# Docker volumes
+portainer/
+nodered/
+mosquitto/data/
+mosquitto/logs/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Temporary files
+*.tmp
+*.temp 

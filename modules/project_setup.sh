@@ -19,6 +19,11 @@ setup_project() {
     mkdir -p $PROJECT_DIR/postgres/data
     mkdir -p $PROJECT_DIR/postgres/init
     mkdir -p $PROJECT_DIR/pgadmin
+    mkdir -p $PROJECT_DIR/mailserver/mail-data    # Added for Mail Server
+    mkdir -p $PROJECT_DIR/mailserver/mail-state   # Added for Mail Server
+    mkdir -p $PROJECT_DIR/mailserver/mail-logs    # Added for Mail Server
+    mkdir -p $PROJECT_DIR/mailserver/config       # Added for Mail Server
+    mkdir -p $PROJECT_DIR/mailserver/dms/config   # Added for Mail Server
     mkdir -p $PROJECT_DIR/mosquitto/config
     mkdir -p $PROJECT_DIR/mosquitto/data
     mkdir -p $PROJECT_DIR/mosquitto/logs

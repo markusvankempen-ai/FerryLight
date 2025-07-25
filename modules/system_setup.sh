@@ -1,3 +1,8 @@
+# FerryLightV2 System Setup Module
+# Author: Markus van Kempen
+# Date: July 24, 2025
+# Email: markus.van.kempen@gmail.com
+
 setup_system() {
     print_step "1" "Preparing system..."
     

@@ -1,6 +1,9 @@
 #!/bin/bash
 
-# FerryLightV2 Complete Setup Script - Main Orchestrator
+# FerryLightV2 Complete Setup Script
+# Author: Markus van Kempen
+# Date: July 24, 2025
+# Email: markus.van.kempen@gmail.com - Main Orchestrator
 # All-in-one solution for Ubuntu 22.04 with Docker, Portainer, Traefik, Node-RED, and Mosquitto
 # Updated for current environment with MQTT authentication
 
@@ -26,6 +29,10 @@ NODERED_USERNAME="${NODERED_USERNAME:-admin}"
 NODERED_PASSWORD="${NODERED_PASSWORD:-your-secure-password}"
 MQTT_USERNAME="${MQTT_USERNAME:-ferrylight}"
 MQTT_PASSWORD="${MQTT_PASSWORD:-your-secure-mqtt-password}"
+
+# Mail Server Configuration
+MAIL_ADMIN_PASSWORD="${MAIL_ADMIN_PASSWORD:-your-secure-mail-password}"
+MAIL_API_KEY="${MAIL_API_KEY:-your-secure-api-key}"
 
 # Colors for output
 RED='\033[0;31m'
@@ -95,6 +102,7 @@ load_modules() {
     source modules/docker_compose.sh
     source modules/services.sh
     source modules/mqtt_auth.sh
+    source modules/mail_server.sh
     source modules/final_config.sh
     source modules/results.sh
     
@@ -143,10 +151,13 @@ main() {
     # Step 6: Configure MQTT authentication
     configure_mqtt_auth
 
-    # Step 7: Final configuration
+    # Step 7: Setup mail server
+    setup_mail_server
+
+    # Step 8: Final configuration
     final_configuration
 
-    # Step 8: Show results
+    # Step 9: Show results
     show_results
 }
 

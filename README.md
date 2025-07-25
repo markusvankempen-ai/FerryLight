@@ -1,5 +1,9 @@
 # FerryLightV2 - MQTT Traffic Light System
 
+**Author:** Markus van Kempen  
+**Date:** July 24, 2025  
+**Email:** markus.van.kempen@gmail.com
+
 A comprehensive MQTT-based traffic light management system with authentication and real-time monitoring.
 
 ## 🚦 Overview

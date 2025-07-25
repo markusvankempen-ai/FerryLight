@@ -1,6 +1,9 @@
 #!/bin/bash
 
 # FerryLightV2 Quick Setup Script
+# Author: Markus van Kempen
+# Date: July 24, 2025
+# Email: markus.van.kempen@gmail.com
 # Downloads and runs the complete setup
 
 echo "🚀 FerryLightV2 Quick Setup"

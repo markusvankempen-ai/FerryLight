@@ -244,10 +244,10 @@ sudo chmod -R 755 /opt/ferrylightv2
 docker-compose ps
 
 # Check network connectivity
-ping mqtt.ferrylight.online
+ping mqtt.[your-domain]
 
 # Test MQTT connection
-mosquitto_pub -h mqtt.ferrylight.online -p 1883 -t test -m "test"
+mosquitto_pub -h mqtt.[your-domain] -p 1883 -t test -m "test"
 
 # View real-time logs
 docker-compose logs -f

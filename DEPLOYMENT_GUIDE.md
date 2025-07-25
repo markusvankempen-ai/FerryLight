@@ -10,7 +10,7 @@
 ### Prerequisites
 - Ubuntu 22.04 LTS server
 - SSH access with sudo privileges
-- Domain name (ferrylight.online)
+- Domain name ([your-domain])
 - Server IP (209.209.43.250)
 
 ### One-Command Setup
@@ -46,11 +46,11 @@ chmod +x ferrylightv2_complete_setup.sh
 
 | Service | URL | Description | Authentication |
 |---------|-----|-------------|----------------|
-| Main Website | https://ferrylight.online | Server dashboard | None |
-| Portainer | https://portainer.ferrylight.online | Docker management | Create on first visit |
+| Main Website | https://[your-domain] | Server dashboard | None |
+| Portainer | https://portainer.[your-domain] | Docker management | Create on first visit |
 | Traefik | https://traefik.[your-domain] | Reverse proxy dashboard | admin:[your-password] |
 | Node-RED | https://nodered.[your-domain] | Visual programming | admin:[your-password] |
-| MQTT Broker | mqtt.ferrylight.online:1883 | MQTT messaging | Anonymous (open) |
+| MQTT Broker | mqtt.[your-domain]:1883 | MQTT messaging | Anonymous (open) |
 
 ## 🔐 Default Credentials
 
@@ -157,7 +157,7 @@ Add these A records in your DNS provider:
 
 ### Namecheap DNS Setup
 1. Log into Namecheap account
-2. Go to Domain List → Manage for ferrylight.online
+2. Go to Domain List → Manage for [your-domain]
 3. Click on "Advanced DNS"
 4. Remove any existing CNAME records for these subdomains
 5. Add the A records above
@@ -167,12 +167,12 @@ Add these A records in your DNS provider:
 ### DNS Testing
 ```bash
 # Test DNS resolution
-nslookup ferrylight.online
-nslookup www.ferrylight.online
-nslookup portainer.ferrylight.online
-nslookup traefik.ferrylight.online
-nslookup nodered.ferrylight.online
-nslookup mqtt.ferrylight.online
+nslookup [your-domain]
+nslookup www.[your-domain]
+nslookup portainer.[your-domain]
+nslookup traefik.[your-domain]
+nslookup nodered.[your-domain]
+nslookup mqtt.[your-domain]
 ```
 
 ## 🔒 SSL Certificate Management
@@ -200,7 +200,7 @@ docker-compose logs traefik | grep -i certificate
 ## 🔌 MQTT Configuration
 
 ### Default Configuration (Open Access)
-- **Broker**: mqtt.ferrylight.online
+- **Broker**: mqtt.[your-domain]
 - **Port**: 1883 (TCP) / 9001 (WebSocket)
 - **Authentication**: Anonymous (open access)
 - **External Access**: Enabled
@@ -222,13 +222,13 @@ allow_anonymous true
 sudo apt install mosquitto-clients
 
 # Subscribe to test topic
-mosquitto_sub -h mqtt.ferrylight.online -t test/topic
+mosquitto_sub -h mqtt.[your-domain] -t test/topic
 
 # Publish to test topic
-mosquitto_pub -h mqtt.ferrylight.online -t test/topic -m "Hello MQTT"
+mosquitto_pub -h mqtt.[your-domain] -t test/topic -m "Hello MQTT"
 
 # Test WebSocket connection
-mosquitto_sub -h mqtt.ferrylight.online -p 9001 -t test/topic
+mosquitto_sub -h mqtt.[your-domain] -p 9001 -t test/topic
 ```
 
 ### Optional MQTT Authentication
@@ -246,8 +246,8 @@ cd /opt/ferrylightv2
 
 ### Authentication
 - **Username**: admin
-- **Password**: ferrylight2024
-- **Access**: https://nodered.ferrylight.online
+- **Password**: [your-password]
+- **Access**: https://nodered.[your-domain]
 
 ### Configuration File
 ```bash
@@ -273,8 +273,8 @@ adminAuth: {
 
 ### Authentication
 - **Username**: admin
-- **Password**: ferrylight2024
-- **Access**: https://traefik.ferrylight.online
+- **Password**: [your-password]
+- **Access**: https://traefik.[your-domain]
 
 ### Features
 - Automatic SSL certificate generation
@@ -295,7 +295,7 @@ adminAuth: {
 docker-compose logs traefik
 
 # Verify DNS resolution
-nslookup ferrylight.online
+nslookup [your-domain]
 
 # Check container connectivity
 docker-compose exec website curl -I http://localhost
@@ -417,15 +417,15 @@ docker-compose exec website ping portainer
 docker-compose exec website ping traefik
 
 # Test external connectivity
-curl -I http://ferrylight.online
-curl -I https://ferrylight.online
+curl -I http://[your-domain]
+curl -I https://[your-domain]
 
 # Check DNS resolution
-dig ferrylight.online
-nslookup ferrylight.online
+dig [your-domain]
+nslookup [your-domain]
 
 # Test MQTT connectivity
-mosquitto_pub -h mqtt.ferrylight.online -t test -m "test"
+mosquitto_pub -h mqtt.[your-domain] -t test -m "test"
 ```
 
 ## 🔄 Backup and Restore
@@ -480,8 +480,8 @@ docker-compose up -d
 ## 📊 Monitoring
 
 ### Traefik Dashboard
-- **URL**: https://traefik.ferrylight.online
-- **Credentials**: admin:ferrylight2024
+- **URL**: https://traefik.[your-domain]
+- **Credentials**: admin:[your-password]
 - **Features**: 
   - HTTP routers and services
   - SSL certificate status
@@ -489,7 +489,7 @@ docker-compose up -d
   - Middleware configuration
 
 ### Portainer Dashboard
-- **URL**: https://portainer.ferrylight.online
+- **URL**: https://portainer.[your-domain]
 - **Features**:
   - Container management
   - Image management
@@ -497,8 +497,8 @@ docker-compose up -d
   - Network management
 
 ### Node-RED Dashboard
-- **URL**: https://nodered.ferrylight.online
-- **Credentials**: admin:ferrylight2024
+- **URL**: https://nodered.[your-domain]
+- **Credentials**: admin:[your-password]
 - **Features**:
   - Visual programming
   - Flow management
@@ -619,8 +619,8 @@ sudo systemctl status ferrylightv2
 docker-compose logs --tail=50
 
 # Network connectivity
-ping ferrylight.online
-curl -I https://ferrylight.online
+ping [your-domain]
+curl -I https://[your-domain]
 
 # Resource usage
 docker stats
@@ -628,7 +628,7 @@ df -h
 free -h
 
 # MQTT connectivity
-mosquitto_pub -h mqtt.ferrylight.online -t test -m "test"
+mosquitto_pub -h mqtt.[your-domain] -t test -m "test"
 ```
 
 ---

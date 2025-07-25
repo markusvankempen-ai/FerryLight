@@ -3,6 +3,7 @@
 # Credentials and sensitive files
 CREDENTIALS.md
 SECURITY_SUMMARY.md
+internal_docs/
 *.env
 .env.local
 .env.production

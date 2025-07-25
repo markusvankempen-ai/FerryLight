@@ -10,15 +10,15 @@ This guide provides comprehensive instructions for accessing and managing the Po
 
 ### **1. 🖥️ pgAdmin Web Interface (Recommended)**
 
-**URL:** `https://pgadmin.ferrylight.online`
+**URL:** `https://pgadmin.[your-domain]`
 
 **Login Credentials:**
-- **Email:** `admin@ferrylight.online`
-- **Password:** `ferrylight2024`
+- **Email:** `[your-pgadmin-email]`
+- **Password:** `[your-pgadmin-password]`
 
 **Steps:**
 1. Open your browser
-2. Go to `https://pgadmin.ferrylight.online`
+2. Go to `https://pgadmin.[your-domain]`
 3. Login with the credentials above
 4. Add PostgreSQL server connection:
    - **Host:** `postgres` (Docker service name)
@@ -166,9 +166,9 @@ postgresql://ferrylight:ferrylight@Connexts@99@postgres:5432/ferrylight
 ## 📱 **Quick Access Summary**
 
 **For Web Interface:**
-- **URL:** `https://pgadmin.ferrylight.online`
-- **Email:** `admin@ferrylight.online`
-- **Password:** `ferrylight2024`
+- **URL:** `https://pgadmin.[your-domain]`
+- **Email:** `[your-pgadmin-email]`
+- **Password:** `[your-pgadmin-password]`
 
 **For Command Line:**
 ```bash
@@ -324,7 +324,7 @@ docker exec -it postgres bash
 
 ## 🎯 **Quick Start Checklist**
 
-- [ ] **pgAdmin Web Interface:** `https://pgadmin.ferrylight.online`
+- [ ] **pgAdmin Web Interface:** `https://pgadmin.[your-domain]`
 - [ ] **Command Line Access:** `docker exec -it postgres psql -U ferrylight -d ferrylight`
 - [ ] **Test Script:** `./test_postgres.sh`
 - [ ] **Check Status:** `docker-compose ps postgres`

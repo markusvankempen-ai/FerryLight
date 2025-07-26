@@ -113,7 +113,7 @@ Add this service to your `docker-compose.yml`:
       - "587:587"  # SMTP submission
       - "993:993"  # IMAPS
     volumes:
-      - ./mailserver/dms/config:/tmp/docker-mailserver:ro
+      - ./mailserver/config:/tmp/docker-mailserver    # ✅ Writable - required for user management
       - ./mailserver/mail-data:/var/mail
       - ./mailserver/mail-state:/var/mail-state
       - ./mailserver/mail-logs:/var/log/mail
@@ -155,6 +155,25 @@ docker-compose ps mailserver
 # View logs
 docker-compose logs mailserver
 ```
+
+### 5. ⚠️ Critical Volume Mount Configuration
+
+**IMPORTANT:** The configuration volume mount must NOT be read-only for user management to work:
+
+**✅ Correct (Writable):**
+```yaml
+- ./mailserver/config:/tmp/docker-mailserver
+```
+
+**❌ Incorrect (Read-only):**
+```yaml
+- ./mailserver/config:/tmp/docker-mailserver:ro
+```
+
+**Why This Matters:**
+- Docker Mail Server needs to write to `/tmp/docker-mailserver/postfix-accounts.cf` for user management
+- Read-only mounts cause "Read-only file system" errors when adding users
+- The `:ro` flag prevents user creation, deletion, and password updates
 
 ## 📧 Mail Server Configuration
 
@@ -397,6 +416,20 @@ docker exec ferrylightv2-mailserver setup config ssl
 ## 🚨 Troubleshooting
 
 ### 1. Common Issues
+
+**"Read-only file system" error when adding users:**
+```bash
+# Error: /tmp/docker-mailserver/postfix-accounts.cf: Read-only file system
+
+# Solution: Fix volume mount in docker-compose.yml
+# Change from:
+# - ./mailserver/config:/tmp/docker-mailserver:ro
+# To:
+# - ./mailserver/config:/tmp/docker-mailserver
+
+# Then restart the mail server:
+docker-compose restart mailserver
+```
 
 **Port 25 blocked by ISP:**
 ```bash

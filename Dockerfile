@@ -1,4 +1,4 @@
-# Multi-stage build for React app
+# Multi-stage build for FerryLight React app with Express.js server
 FROM node:18-alpine AS builder
 
 # Set working directory
@@ -7,26 +7,55 @@ WORKDIR /app
 # Copy package files
 COPY package*.json ./
 
-# Install dependencies
-RUN npm ci --only=production
+# Install all dependencies (including dev dependencies for build)
+RUN npm ci
 
 # Copy source code
 COPY . .
 
-# Build the app
+# Build the React app
 RUN npm run build
 
 # Production stage
-FROM nginx:alpine
+FROM node:18-alpine
 
-# Copy built app from builder stage
-COPY --from=builder /app/build /usr/share/nginx/html
+# Install dumb-init for proper signal handling
+RUN apk add --no-cache dumb-init
 
-# Copy nginx configuration
-COPY nginx.conf /etc/nginx/nginx.conf
+# Create app directory
+WORKDIR /app
 
-# Expose port 80
-EXPOSE 80
+# Create non-root user for security
+RUN addgroup -g 1001 -S nodejs
+RUN adduser -S ferrylight -u 1001
 
-# Start nginx
-CMD ["nginx", "-g", "daemon off;"] 
+# Copy package files
+COPY package*.json ./
+
+# Install only production dependencies
+RUN npm ci --only=production && npm cache clean --force
+
+# Copy built React app from builder stage
+COPY --from=builder /app/build ./build
+
+# Copy server files
+COPY server.js ./
+COPY nginx.conf ./
+
+# Copy environment example (don't copy actual .env)
+COPY env.example ./
+
+# Change ownership to non-root user
+RUN chown -R ferrylight:nodejs /app
+USER ferrylight
+
+# Expose port 3001 for Express server
+EXPOSE 3001
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
+  CMD node -e "require('http').get('http://localhost:3001/api/health', (res) => { process.exit(res.statusCode === 200 ? 0 : 1) })"
+
+# Start the Express server using dumb-init
+ENTRYPOINT ["dumb-init", "--"]
+CMD ["node", "server.js"] 

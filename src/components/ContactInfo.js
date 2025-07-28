@@ -243,7 +243,7 @@ const ContactInfoComponent = () => {
             whileTap={{ scale: 0.98 }}
           >
             <FiMail />
-            markus.van.kempen@gmail.com
+           email markus
           </ContactEmail>
         </ContactSection>
 

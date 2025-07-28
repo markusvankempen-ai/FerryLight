@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   # FerryLight Express.js server (serves React app and API proxy)
   ferrylight-app:

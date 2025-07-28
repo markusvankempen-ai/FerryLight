@@ -30,7 +30,19 @@ services:
       # Mount .env file if it exists (for runtime config)
       - ./.env:/app/.env:ro
     networks:
-      - ferrylight-network
+      - default
+    labels:
+      # Traefik configuration
+      - "traefik.enable=true"
+      - "traefik.http.routers.ferrylight.rule=Host(`${FERRYLIGHT_DOMAIN:-ferrylight.local}`)"
+      - "traefik.http.routers.ferrylight.entrypoints=websecure"
+      - "traefik.http.routers.ferrylight.tls.certresolver=letsencrypt"
+      - "traefik.http.services.ferrylight.loadbalancer.server.port=3001"
+      # HTTP to HTTPS redirect
+      - "traefik.http.routers.ferrylight-http.rule=Host(`${FERRYLIGHT_DOMAIN:-ferrylight.local}`)"
+      - "traefik.http.routers.ferrylight-http.entrypoints=web"
+      - "traefik.http.routers.ferrylight-http.middlewares=redirect-to-https"
+      - "traefik.http.middlewares.redirect-to-https.redirectscheme.scheme=https"
     healthcheck:
       test: ["CMD", "node", "-e", "require('http').get('http://localhost:3001/api/health', (res) => { process.exit(res.statusCode === 200 ? 0 : 1) })"]
       interval: 30s
@@ -38,7 +50,7 @@ services:
       retries: 3
       start_period: 40s
 
-  # Nginx reverse proxy for SSL termination and load balancing
+  # Optional: Standalone Nginx (only if not using existing Traefik)
   nginx-proxy:
     image: nginx:alpine
     container_name: ferrylight-nginx
@@ -54,7 +66,9 @@ services:
         condition: service_healthy
     restart: unless-stopped
     networks:
-      - ferrylight-network
+      - default
+    profiles:
+      - standalone-nginx
     healthcheck:
       test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost/nginx-health"]
       interval: 30s
@@ -70,7 +84,7 @@ services:
     volumes:
       - redis-data:/data
     networks:
-      - ferrylight-network
+      - default
     profiles:
       - cache
     healthcheck:
@@ -93,7 +107,7 @@ services:
       - postgres-data:/var/lib/postgresql/data
       - ./init.sql:/docker-entrypoint-initdb.d/init.sql:ro
     networks:
-      - ferrylight-network
+      - default
     profiles:
       - analytics
     healthcheck:
@@ -102,10 +116,12 @@ services:
       timeout: 5s
       retries: 3
 
+# No need for custom network when using existing Traefik
+# The app will use the default network and Traefik will discover it
 networks:
-  ferrylight-network:
-    driver: bridge
-    name: ferrylight-network
+  default:
+    name: ${TRAEFIK_NETWORK:-ferrylight-network}
+    external: ${TRAEFIK_NETWORK_EXTERNAL:-false}
 
 volumes:
   redis-data:

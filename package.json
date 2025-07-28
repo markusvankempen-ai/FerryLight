@@ -17,7 +17,9 @@
     "pwa",
     "real-time",
     "led-display",
-    "docker"
+    "docker",
+    "express",
+    "server"
   ],
   "license": "MIT",
   "private": true,
@@ -25,14 +27,17 @@
     "@testing-library/jest-dom": "^5.16.4",
     "@testing-library/react": "^13.3.0",
     "@testing-library/user-event": "^13.5.0",
+    "axios": "^1.4.0",
+    "cors": "^2.8.5",
+    "dotenv": "^16.3.1",
+    "express": "^4.18.2",
+    "framer-motion": "^10.12.4",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "react-scripts": "5.0.1",
-    "axios": "^1.4.0",
-    "react-router-dom": "^6.11.2",
-    "styled-components": "^5.3.10",
     "react-icons": "^4.8.0",
-    "framer-motion": "^10.12.4",
+    "react-router-dom": "^6.11.2",
+    "react-scripts": "5.0.1",
+    "styled-components": "^5.3.10",
     "web-vitals": "^2.1.4"
   },
   "scripts": {
@@ -42,7 +47,10 @@
     "test": "react-scripts test",
     "eject": "react-scripts eject",
     "generate-favicons": "node scripts/generate-favicons.js",
-    "deploy": "npm run build && echo 'Build complete! Upload the build folder to your server.'"
+    "deploy": "npm run build && echo 'Build complete! Upload the build folder to your server.'",
+    "server": "node server.js",
+    "dev": "concurrently \"npm run start\" \"npm run server\"",
+    "start:prod": "npm run build && npm run server"
   },
   "eslintConfig": {
     "extends": [
@@ -62,5 +70,8 @@
       "last 1 safari version"
     ]
   },
-  "proxy": "http://localhost:3000"
-} 
+  "proxy": "http://localhost:3001",
+  "devDependencies": {
+    "concurrently": "^9.2.0"
+  }
+}

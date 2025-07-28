@@ -1,0 +1,79 @@
+# FerryLightV2 Mail Server Docker Compose Fix
+# Author: Markus van Kempen
+# Date: July 24, 2025
+# Email: markus.van.kempen@gmail.com
+
+# ⚠️ INTERNAL USE ONLY - NEVER COMMIT TO GITHUB
+# This file contains REAL credentials and domain information
+
+# Add this to the SERVICES section of your docker-compose.yml
+# NOT in the networks section!
+
+mailserver:
+  image: docker.io/mailserver/docker-mailserver:latest
+  container_name: ferrylightv2-mailserver
+  restart: unless-stopped
+  hostname: mail.ferrylight.online
+  domainname: ferrylight.online
+  ports:
+    - "25:25"    # SMTP
+    - "143:143"  # IMAP
+    - "465:465"  # SMTPS
+    - "587:587"  # SMTP submission
+    - "993:993"  # IMAPS
+  volumes:
+    - ./mailserver/dms/config:/tmp/docker-mailserver:ro
+    - ./mailserver/mail-data:/var/mail
+    - ./mailserver/mail-state:/var/mail-state
+    - ./mailserver/mail-logs:/var/log/mail
+    - /etc/localtime:/etc/localtime:ro
+  environment:
+    - DMS_DOMAINNAME=ferrylight.online
+    - DMS_HOSTNAME=mail.ferrylight.online
+    - DMS_ADMIN_EMAIL=admin@ferrylight.online
+    - DMS_ADMIN_PASSWORD=ferrylight@Connexts@99
+    - DMS_MAILNAME=mail.ferrylight.online
+    - DMS_SSL_TYPE=letsencrypt
+    - DMS_SSL_DOMAIN=mail.ferrylight.online
+    - DMS_SPAMASSASSIN_SPAM_TO_INBOX=1
+    - DMS_CLAMAV=1
+    - DMS_ONE_DIR=1
+    - DMS_API=1
+    - DMS_API_KEY=ferrylight-api-key-2024
+  networks:
+    - traefik-public
+  labels:
+    - "traefik.enable=true"
+    - "traefik.http.routers.mail.rule=Host(`mail.ferrylight.online`)"
+    - "traefik.http.routers.mail.entrypoints=websecure"
+    - "traefik.http.routers.mail.tls.certresolver=letsencrypt"
+    - "traefik.http.services.mail.loadbalancer.server.port=80"
+  depends_on:
+    - traefik
+
+# INSTRUCTIONS TO FIX YOUR DOCKER-COMPOSE.YML:
+# 
+# 1. SSH into your server: ssh root@209.209.43.250
+# 2. Navigate to project: cd /opt/ferrylightv2
+# 3. Backup current file: cp docker-compose.yml docker-compose.yml.backup
+# 4. Edit the file: nano docker-compose.yml
+# 5. Find the "services:" section
+# 6. Add the mailserver configuration above to the services section
+# 7. Make sure it's NOT in the networks section
+# 8. Save and exit: Ctrl+X, Y, Enter
+# 9. Validate: docker-compose config
+# 10. Start mail server: docker-compose up -d mailserver
+#
+# CORRECT STRUCTURE:
+# version: '3.8'
+# networks:
+#   traefik-public:
+#     external: true
+# services:
+#   traefik:
+#     # traefik config...
+#   portainer:
+#     # portainer config...
+#   mailserver:
+#     # mailserver config (add here)...
+#   # other services... 

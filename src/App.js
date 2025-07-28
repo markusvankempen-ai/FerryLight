@@ -155,33 +155,6 @@ function App() {
     };
   }, [fetchData]);
 
-  // API connectivity test on component mount - only runs once
-  useEffect(() => {
-    const testConnectivity = async () => {
-      logAppDebug('🧪 Testing API connectivity on app start...');
-      const isConnected = await testApiConnectivity();
-      
-      if (isConnected) {
-        logAppDebug('✅ API connectivity test passed');
-      } else {
-        logAppDebug('❌ API connectivity test failed');
-      }
-    };
-    
-    testConnectivity();
-  }, []);
-
-  // Network connectivity test on component mount - only runs once
-  useEffect(() => {
-    // Disabled network connectivity test to prevent DNS errors
-    // const testNetwork = async () => {
-    //   logAppDebug('🌐 Testing network connectivity...');
-    //   await testNetworkConnectivity();
-    // };
-    
-    // testNetwork();
-  }, []);
-
   // Browser information on component mount - only runs once
   useEffect(() => {
     logAppDebug('🌐 Getting browser information...');

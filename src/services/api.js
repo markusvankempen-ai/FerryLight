@@ -1,22 +1,19 @@
 import axios from 'axios';
 import { logDebug } from '../utils/debug';
 
-// Create axios instance with base configuration
+// Create axios instance for client-side API calls
 const api = axios.create({
-  timeout: 15000, // Increased timeout
+  timeout: 15000,
   headers: {
     'Content-Type': 'application/json',
   },
 });
 
-// Use environment variables for API credentials
-const username = process.env.REACT_APP_API_USERNAME || 'demo';
-const password = process.env.REACT_APP_API_PASSWORD || 'demo';
-const credentials = btoa(`${username}:${password}`);
-
-// API endpoints
-const FERRY_API = process.env.REACT_APP_FERRY_API_URL || 'https://nodered.ferrylight.online/rbferry';
-const WEATHER_API = process.env.REACT_APP_WEATHER_API_URL || 'https://nodered.ferrylight.online/rbweather';
+// Server-side API endpoints (no credentials needed on client)
+const FERRY_API = '/api/ferry';
+const WEATHER_API = '/api/weather';
+const ALL_DATA_API = '/api/all';
+const HEALTH_API = '/api/health';
 
 // Retry configuration
 const RETRY_CONFIG = {
@@ -54,116 +51,50 @@ const retryRequest = async (requestFn, retryCount = 0) => {
   }
 };
 
-// Add auth header to requests
+// Add request logging interceptor
 api.interceptors.request.use(
   (config) => {
-    // Add basic auth header
-    config.headers.Authorization = `Basic ${credentials}`;
-    
-    logDebug('📤 API Request:', {
+    logDebug('📤 Client API Request:', {
       method: config.method?.toUpperCase(),
       url: config.url,
       headers: {
-        'Content-Type': config.headers['Content-Type'],
-        'Authorization': 'Basic [REDACTED]'
+        'Content-Type': config.headers['Content-Type']
       }
     });
     
     return config;
   },
   (error) => {
-    logDebug('❌ Request Error:', error.message);
+    logDebug('❌ Client Request Error:', error.message);
     return Promise.reject(error);
   }
 );
 
-// Error handling interceptor
+// Add response logging interceptor
 api.interceptors.response.use(
   (response) => {
-    logDebug(`✅ API Response: ${response.status} ${response.statusText}`, {
+    logDebug(`✅ Client API Response: ${response.status} ${response.statusText}`, {
       url: response.config.url,
       method: response.config.method,
       dataSize: JSON.stringify(response.data).length,
       timestamp: new Date().toISOString()
     });
     
-    // Log response data structure (first level only)
-    if (response.data) {
-      const dataKeys = Object.keys(response.data);
-      logDebug('📊 Response Data Keys:', dataKeys);
-      
-      // Log specific data for ferry API
-      if (response.config.url.includes('rbferry')) {
-        const ferryData = response.data;
-        logDebug('🚢 Ferry Data Summary:', {
-          hasTimestamp: !!ferryData.timestamp,
-          hasFerryStatus: !!ferryData.ferryStatus,
-          hasDirections: !!ferryData.directions,
-          ferryStatus: ferryData.ferryStatus?.status || 'Unknown',
-          lastUpdated: ferryData.timestamp || 'Unknown'
-        });
-      }
-      
-      // Log specific data for weather API
-      if (response.config.url.includes('rbweather')) {
-        const weatherData = response.data;
-        logDebug('☁️ Weather Data Summary:', {
-          hasTemp: !!weatherData.tempf,
-          hasHumidity: !!weatherData.humidity,
-          hasWind: !!weatherData.windspeedkmh,
-          temperature: weatherData.tempf || 'Unknown',
-          humidity: weatherData.humidity || 'Unknown',
-          lastUpdated: weatherData.dateutc || 'Unknown'
-        });
-      }
-    }
-    
     return response;
   },
   (error) => {
-    const errorInfo = {
+    logDebug('❌ Client API Error:', {
       message: error.message,
       status: error.response?.status,
-      statusText: error.response?.statusText,
       url: error.config?.url,
-      method: error.config?.method,
-      timestamp: new Date().toISOString(),
-      code: error.code,
-      isRetryable: false
-    };
-    
-    // Determine if error is retryable
-    errorInfo.isRetryable = 
-      error.code === 'ECONNABORTED' ||
-      error.message.includes('ERR_INSUFFICIENT_RESOURCES') ||
-      error.message.includes('ERR_NETWORK') ||
-      error.message.includes('ERR_CONNECTION_REFUSED') ||
-      error.message.includes('ERR_NAME_NOT_RESOLVED') ||
-      (error.response && error.response.status >= 500);
-    
-    logDebug(`❌ API Error: ${error.message}`, errorInfo);
-    
-    if (error.response?.status === 401) {
-      logDebug('🔒 Authentication failed - check credentials');
-    } else if (error.response?.status === 404) {
-      logDebug('🔍 API endpoint not found - check URL');
-    } else if (error.response?.status >= 500) {
-      logDebug('🛠️ Server error - API may be down');
-    } else if (error.code === 'ECONNABORTED') {
-      logDebug('⏰ Request timeout - check network connection');
-    } else if (error.message.includes('ERR_INSUFFICIENT_RESOURCES')) {
-      logDebug('💾 Server resources exhausted - API may be overloaded');
-    } else if (error.message.includes('ERR_NETWORK')) {
-      logDebug('🌐 Network error - check internet connection');
-    } else if (error.message.includes('ERR_CONNECTION_REFUSED')) {
-      logDebug('🚫 Connection refused - API server may be down');
-    }
+      timestamp: new Date().toISOString()
+    });
     
     return Promise.reject(error);
   }
 );
 
-// Mock data for fallback when API is unavailable - updated to match real API structure
+// Mock data functions (fallback for when server is unavailable)
 const getMockFerryData = () => ({
   timestamp: new Date().toLocaleString('en-US', {
     year: 'numeric',
@@ -227,13 +158,14 @@ const getMockWeatherData = () => ({
   drain_piezomm: 0,
   mrain_piezomm: 0,
   yrain_piezomm: 0,
-  conditions: 'Data Unavailable', // This marks it as mock data
+  conditions: 'Data Unavailable',
   stationtype: 'Offline',
   model: 'Mock Data'
 });
 
+// Single ferry data fetch (now calls server-side endpoint)
 export const fetchFerryData = async () => {
-  logDebug('🚢 Starting ferry data fetch...');
+  logDebug('🚢 Starting ferry data fetch from server...');
   
   try {
     const startTime = Date.now();
@@ -262,13 +194,14 @@ export const fetchFerryData = async () => {
       url: FERRY_API
     });
     
-    // Return mock data when API is unavailable
+    // Return mock data when server is unavailable
     return getMockFerryData();
   }
 };
 
+// Single weather data fetch (now calls server-side endpoint)
 export const fetchWeatherData = async () => {
-  logDebug('☁️ Starting weather data fetch...');
+  logDebug('☁️ Starting weather data fetch from server...');
   
   try {
     const startTime = Date.now();
@@ -297,30 +230,26 @@ export const fetchWeatherData = async () => {
       url: WEATHER_API
     });
     
-    // Return mock data when API is unavailable
+    // Return mock data when server is unavailable
     return getMockWeatherData();
   }
 };
 
+// Combined data fetch (now calls server-side endpoint)
 export const fetchAllData = async () => {
-  logDebug('🔄 Starting combined data fetch...');
+  logDebug('🔄 Starting combined data fetch from server...');
   
   try {
     const startTime = Date.now();
     
-    logDebug('📡 Making parallel API calls...');
-    const [ferryData, weatherData] = await Promise.all([
-      fetchFerryData(),
-      fetchWeatherData(),
-    ]);
+    logDebug('📡 Calling server-side /api/all endpoint...');
+    const response = await retryRequest(async () => {
+      return await api.get(ALL_DATA_API);
+    });
     
     const endTime = Date.now();
     
-    const result = {
-      ferry: ferryData,
-      weather: weatherData,
-      timestamp: new Date().toISOString(),
-    };
+    const result = response.data;
     
     logDebug(`✅ Combined data fetch completed in ${endTime - startTime}ms`);
     logDebug('📊 Combined data summary:', {
@@ -333,45 +262,31 @@ export const fetchAllData = async () => {
     
     return result;
   } catch (error) {
-    logDebug('❌ Combined data fetch failed:', {
+    logDebug('❌ Combined data fetch failed, using mock data:', {
       error: error.message,
-      timestamp: new Date().toISOString()
+      status: error.response?.status,
+      url: ALL_DATA_API
     });
     
-    // Return mock data when all APIs fail
+    // Return mock data when server is unavailable
     return {
       ferry: getMockFerryData(),
       weather: getMockWeatherData(),
-      timestamp: new Date().toISOString(),
+      timestamp: new Date().toISOString()
     };
   }
 };
 
-// Debug function to test API connectivity
+// Server health check
 export const testApiConnectivity = async () => {
-  logDebug('🧪 Testing API connectivity...');
+  logDebug('🏥 Testing server connectivity...');
   
   try {
-    // Test ferry API
-    logDebug('🔍 Testing ferry API...');
-    const ferryResponse = await api.get(FERRY_API);
-    logDebug('✅ Ferry API test successful:', {
-      status: ferryResponse.status,
-      hasData: !!ferryResponse.data
-    });
-    
-    // Test weather API
-    logDebug('🔍 Testing weather API...');
-    const weatherResponse = await api.get(WEATHER_API);
-    logDebug('✅ Weather API test successful:', {
-      status: weatherResponse.status,
-      hasData: !!weatherResponse.data
-    });
-    
-    logDebug('🎉 All API tests passed!');
+    const response = await api.get(HEALTH_API);
+    logDebug('✅ Server health check passed:', response.data);
     return true;
   } catch (error) {
-    logDebug('❌ API connectivity test failed:', {
+    logDebug('❌ Server health check failed:', {
       error: error.message,
       status: error.response?.status
     });

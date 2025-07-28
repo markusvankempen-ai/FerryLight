@@ -123,13 +123,29 @@ A modern React web application providing real-time ferry status, wait times, and
    
    **⚠️ Important:** The app will show 401 Unauthorized errors until you set the correct API credentials!
 
-4. **Start development server**
+4. **Start development (with server-side API proxy)**
    ```bash
+   # Start both React app and server concurrently
+   npm run dev
+   ```
+   
+   Or start them separately:
+   ```bash
+   # Terminal 1: Start the server (port 3001)
+   npm run server
+   
+   # Terminal 2: Start the React app (port 3000)
    npm start
    ```
 
 5. **Open your browser**
    Navigate to `http://localhost:3000`
+   
+   **Server endpoints available at:**
+   - `http://localhost:3001/api/ferry` - Ferry data
+   - `http://localhost:3001/api/weather` - Weather data
+   - `http://localhost:3001/api/all` - Combined data
+   - `http://localhost:3001/api/health` - Health check
 
 ### Production Build
 
@@ -316,11 +332,16 @@ If you see `GET https://nodered.ferrylight.online/rbferry 401 (Unauthorized)` er
    ```bash
    # Test the API directly (replace with your credentials)
    curl -u "your_username:your_password" https://nodered.ferrylight.online/rbferry
+   
+   # Test server-side proxy
+   curl http://localhost:3001/api/ferry
+   curl http://localhost:3001/api/health
    ```
 
 4. **Development vs Production**
-   - Development: Uses `.env` file in project root
-   - Production: Set environment variables in your hosting platform
+   - **Development**: Uses `.env` file in project root, server runs on port 3001
+   - **Production**: Set environment variables in your hosting platform
+   - **Server-side**: API credentials are now handled server-side for security
 
 #### Build Errors
 - **Node Version**: Ensure you're using Node.js 18.x or higher

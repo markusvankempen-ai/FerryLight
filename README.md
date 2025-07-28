@@ -125,12 +125,13 @@ A modern React web application providing real-time ferry status, wait times, and
 
 4. **Start development (with server-side API proxy)**
    ```bash
-   # Start both React app and server concurrently
-   npm run dev
-   ```
+   # Option 1: Use the startup script (recommended)
+   ./start-dev.sh
    
-   Or start them separately:
-   ```bash
+   # Option 2: Start both React app and server concurrently
+   npm run dev
+   
+   # Option 3: Start them separately
    # Terminal 1: Start the server (port 3001)
    npm run server
    

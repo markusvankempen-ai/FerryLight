@@ -1,0 +1,31 @@
+node_modules
+npm-debug.log
+.git
+.gitignore
+README.md
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+.DS_Store
+*.log
+coverage
+.nyc_output
+build
+dist
+.cache
+.parcel-cache
+.vscode
+.idea
+*.swp
+*.swo
+*~
+internal_docs/
+internal_docs copy/
+serversetup/
+
+# Make sure we don't exclude these important directories
+!public/
+!src/
+!scripts/ 

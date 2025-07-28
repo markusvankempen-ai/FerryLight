@@ -13,6 +13,11 @@ RUN npm ci
 # Copy all source files (excluding what's in .dockerignore)
 COPY . .
 
+# Debug: List what files we actually have
+RUN echo "=== DEBUG: Files in /app ===" && ls -la
+RUN echo "=== DEBUG: Files in /app/public ===" && ls -la public/ || echo "Public directory not found!"
+RUN echo "=== DEBUG: Check for index.html ===" && test -f public/index.html && echo "index.html found" || echo "index.html NOT found"
+
 # Build the React app (skip favicon generation for Docker)
 RUN npm run build:docker
 

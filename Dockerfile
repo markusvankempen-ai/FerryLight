@@ -10,15 +10,8 @@ COPY package*.json ./
 # Install all dependencies (including dev dependencies for build)
 RUN npm ci
 
-# Copy public directory and other necessary files
-COPY public/ ./public/
-COPY src/ ./src/
-COPY scripts/ ./scripts/
-
-# Copy other build-related files
-COPY server.js ./
-COPY nginx.conf ./
-COPY env.example ./
+# Copy all source files (excluding what's in .dockerignore)
+COPY . .
 
 # Build the React app (skip favicon generation for Docker)
 RUN npm run build:docker

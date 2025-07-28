@@ -9,7 +9,7 @@ import ContactInfoComponent from './components/ContactInfo';
 import Login from './components/Login';
 import Admin from './components/Admin';
 import DebugPanel from './components/DebugPanel';
-import { fetchAllData, testApiConnectivity } from './services/api';
+import { fetchAllData } from './services/api';
 import { logDebug, getBrowserInfo } from './utils/debug';
 
 const AppContainer = styled.div`

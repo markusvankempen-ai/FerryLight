@@ -111,7 +111,6 @@ const FerryLightComponent = ({ data, isLoading, error }) => {
   const animationRef = useRef(null);
   const lastTimestamp = useRef(0);
   const [currentMatrixText, setCurrentMatrixText] = useState('');
-  const [scrollOffset, setScrollOffset] = useState(0);
   const [matrixDimensions, setMatrixDimensions] = useState(() => getMatrixDimensions());
   const animationActive = useRef(false);
 
@@ -205,7 +204,6 @@ const FerryLightComponent = ({ data, isLoading, error }) => {
       });
 
       setCurrentMatrixText(matrixText.toUpperCase());
-      setScrollOffset(0);
     }
   }, [data]);
 
@@ -229,7 +227,6 @@ const FerryLightComponent = ({ data, isLoading, error }) => {
       const animate = (timestamp) => {
         if (timestamp - lastTimestamp.current > 100) { // 10 FPS for smoother animation
           currentScrollOffset = animateMatrixText(ctx, currentMatrixText, currentScrollOffset);
-          setScrollOffset(currentScrollOffset); // Update state for debugging
           lastTimestamp.current = timestamp;
         }
         if (animationActive.current) {

@@ -18,27 +18,11 @@ const credentials = btoa(`${username}:${password}`);
 const FERRY_API = process.env.REACT_APP_FERRY_API_URL || 'https://nodered.ferrylight.online/rbferry';
 const WEATHER_API = process.env.REACT_APP_WEATHER_API_URL || 'https://nodered.ferrylight.online/rbweather';
 
-// Debug logging function
-const logDebug = (message, data = null) => {
-  const timestamp = new Date().toISOString();
-  const logMessage = `[FerryLight API] ${timestamp}: ${message}`;
-  
-  // Browser console
-  if (typeof window !== 'undefined') {
-    console.log(logMessage, data || '');
-  }
-  
-  // Server console (Node.js)
-  if (typeof process !== 'undefined') {
-    console.log(logMessage, data || '');
-  }
-};
-
 // Retry configuration
 const RETRY_CONFIG = {
   maxRetries: 3,
-  retryDelay: 2000, // 2 seconds
-  backoffMultiplier: 2,
+  retryDelay: 2000, // Start with 2 seconds
+  backoffMultiplier: 2, // Double the delay each retry
 };
 
 // Retry function with exponential backoff

@@ -3,19 +3,59 @@ import styled from 'styled-components';
 import { motion } from 'framer-motion';
 import { logDebug } from '../utils/debug';
 
-// Responsive matrix dimensions - simplified to prevent constant re-renders
+// Responsive matrix dimensions - improved for better screen size awareness
 const getMatrixDimensions = () => {
   if (typeof window !== 'undefined') {
     const width = window.innerWidth;
-    if (width <= 768) {
-      return { width: 96, height: 16, scale: 1.5 };
-    } else if (width <= 1200) {
-      return { width: 128, height: 16, scale: 2 };
-    } else {
-      return { width: 128, height: 16, scale: 2.5 };
+    const height = window.innerHeight;
+    
+    // Very small mobile (phones in portrait)
+    if (width <= 480) {
+      return { 
+        width: 64, 
+        height: 12, 
+        scale: 1.2,
+        maxCanvasWidth: width - 40 // Account for padding
+      };
+    }
+    // Small mobile (phones in landscape, small tablets)
+    else if (width <= 768) {
+      return { 
+        width: 96, 
+        height: 16, 
+        scale: 1.4,
+        maxCanvasWidth: width - 60
+      };
+    }
+    // Tablets
+    else if (width <= 1024) {
+      return { 
+        width: 128, 
+        height: 16, 
+        scale: 1.8,
+        maxCanvasWidth: width - 100
+      };
+    }
+    // Large tablets / small laptops
+    else if (width <= 1200) {
+      return { 
+        width: 128, 
+        height: 16, 
+        scale: 2.2,
+        maxCanvasWidth: 800
+      };
+    }
+    // Desktop
+    else {
+      return { 
+        width: 128, 
+        height: 16, 
+        scale: 2.5,
+        maxCanvasWidth: 1000
+      };
     }
   }
-  return { width: 128, height: 16, scale: 2.5 }; // Default for SSR
+  return { width: 128, height: 16, scale: 2.5, maxCanvasWidth: 1000 }; // Default for SSR
 };
 
 // Constants for matrix display
@@ -207,7 +247,7 @@ const FerryLightComponent = ({ data, isLoading, error }) => {
     }
   }, [data]);
 
-  // Set up canvas and start animation - stable version
+  // Set up canvas and start animation - stable version with responsive scaling
   useEffect(() => {
     if (currentMatrixText && canvasRef.current && !animationActive.current) {
       const canvas = canvasRef.current;
@@ -216,6 +256,27 @@ const FerryLightComponent = ({ data, isLoading, error }) => {
       // Set canvas dimensions based on responsive size
       canvas.width = matrixDimensions.width * (DOT_SIZE + DOT_SPACING);
       canvas.height = matrixDimensions.height * (DOT_SIZE + DOT_SPACING);
+      
+      // Calculate actual scaled dimensions
+      const scaledWidth = canvas.width * matrixDimensions.scale;
+      const scaledHeight = canvas.height * matrixDimensions.scale;
+      
+      // Adjust scale if canvas would be too wide for container
+      let finalScale = matrixDimensions.scale;
+      if (scaledWidth > matrixDimensions.maxCanvasWidth) {
+        finalScale = matrixDimensions.maxCanvasWidth / canvas.width * 0.9; // 10% margin
+        logFerryLightDebug('🔧 Adjusting canvas scale for screen size:', {
+          originalScale: matrixDimensions.scale,
+          adjustedScale: finalScale,
+          canvasWidth: canvas.width,
+          maxCanvasWidth: matrixDimensions.maxCanvasWidth,
+          scaledWidth
+        });
+      }
+      
+      // Apply the final scale
+      canvas.style.transform = `scale(${finalScale})`;
+      canvas.style.transformOrigin = 'center';
       
       // Clear canvas
       ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -299,15 +360,13 @@ const FerryLightComponent = ({ data, isLoading, error }) => {
         
         <DisplaySection>
           <DisplayContainer>
-            <MatrixCanvas 
-              ref={canvasRef} 
-              width={matrixDimensions.width * (DOT_SIZE + DOT_SPACING)} 
-              height={matrixDimensions.height * (DOT_SIZE + DOT_SPACING)}
-              style={{ 
-                transform: `scale(${matrixDimensions.scale})`,
-                transformOrigin: 'center'
-              }}
-            />
+            <MatrixCanvasContainer maxWidth={matrixDimensions.maxCanvasWidth}>
+              <MatrixCanvas 
+                ref={canvasRef} 
+                width={matrixDimensions.width * (DOT_SIZE + DOT_SPACING)} 
+                height={matrixDimensions.height * (DOT_SIZE + DOT_SPACING)}
+              />
+            </MatrixCanvasContainer>
             <MatrixInfo>
               {matrixDimensions.width}×{matrixDimensions.height} LED Matrix Display | Auto-scrolling text with ferry wait times
             </MatrixInfo>
@@ -405,6 +464,11 @@ const DisplaySection = styled.div`
   flex-direction: column;
   gap: 1.5rem;
   margin-bottom: 1.5rem;
+  
+  @media (max-width: 768px) {
+    gap: 1rem;
+    margin-bottom: 1rem;
+  }
 `;
 
 const DisplayContainer = styled.div`
@@ -415,26 +479,59 @@ const DisplayContainer = styled.div`
   box-shadow: inset 0 0 8px rgba(0, 0, 0, 0.5);
   overflow: hidden;
   width: 100%;
-  height: fit-content;
   display: flex;
   flex-direction: column;
   align-items: center;
+  justify-content: center;
+  
+  @media (max-width: 768px) {
+    padding: 0.8rem;
+  }
+  
+  @media (max-width: 480px) {
+    padding: 0.5rem;
+  }
+`;
+
+const MatrixCanvasContainer = styled.div`
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  max-width: ${props => props.maxWidth || 1000}px;
+  overflow: hidden;
+  margin-bottom: 1rem;
+  
+  @media (max-width: 768px) {
+    max-width: calc(100vw - 80px);
+  }
+  
+  @media (max-width: 480px) {
+    max-width: calc(100vw - 40px);
+  }
 `;
 
 const MatrixCanvas = styled.canvas`
   border: 1px solid #444;
   border-radius: 0.3rem;
   background: #000;
-  margin-bottom: 1rem;
+  display: block;
+  max-width: 100%;
+  height: auto;
 `;
 
 const MatrixInfo = styled.div`
   color: #ccc;
   font-size: 0.8rem;
   text-align: center;
+  line-height: 1.4;
 
   @media (max-width: 768px) {
     font-size: 0.7rem;
+  }
+  
+  @media (max-width: 480px) {
+    font-size: 0.65rem;
   }
 
   @media (min-width: 1200px) {
@@ -444,20 +541,36 @@ const MatrixInfo = styled.div`
 
 const PhysicalDisplayContainer = styled.div`
   text-align: center;
+  width: 100%;
+  max-width: 100%;
 `;
 
 const PhysicalDisplayImage = styled.img`
   width: 100%;
-  max-width: 600px;
   height: auto;
   border-radius: 0.4rem;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  max-width: 600px;
+
+  @media (max-width: 480px) {
+    max-width: calc(100vw - 40px);
+    margin: 0 auto;
+  }
 
   @media (max-width: 768px) {
-    max-width: 100%;
+    max-width: calc(100vw - 60px);
+    margin: 0 auto;
+  }
+  
+  @media (max-width: 1024px) {
+    max-width: 500px;
   }
 
   @media (min-width: 1200px) {
+    max-width: 700px;
+  }
+  
+  @media (min-width: 1400px) {
     max-width: 800px;
   }
 `;

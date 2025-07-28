@@ -1,0 +1,37 @@
+version: '3.8'
+
+services:
+  ferrylight-app:
+    build: .
+    ports:
+      - "80:80"
+      - "443:443"
+    container_name: ferrylight-website
+    restart: unless-stopped
+    environment:
+      - NODE_ENV=production
+    volumes:
+      - ./logs:/var/log/nginx
+    networks:
+      - ferrylight-network
+
+  # Optional: Add a reverse proxy for SSL termination
+  nginx-proxy:
+    image: nginx:alpine
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx-ssl.conf:/etc/nginx/nginx.conf
+      - ./ssl:/etc/nginx/ssl
+    depends_on:
+      - ferrylight-app
+    restart: unless-stopped
+    networks:
+      - ferrylight-network
+    profiles:
+      - ssl
+
+networks:
+  ferrylight-network:
+    driver: bridge 

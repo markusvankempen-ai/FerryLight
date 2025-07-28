@@ -1,49 +1,24 @@
-# FerryLightV2 Git Ignore Rules
-# Author: Markus van Kempen
-# Date: July 24, 2025
+# Dependencies
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
 
-# Sensitive files - NEVER commit these
-CREDENTIALS.md
-SECURITY_SUMMARY.md
+# Production builds
+build/
+dist/
+out/
+
+# Environment variables
 .env
 .env.local
-.env.production
-.env.staging
+.env.development.local
+.env.test.local
+.env.production.local
 
-# Internal documentation with real credentials
-internal_docs/
-internal_docs/*
-
-# SSL certificates and keys
-*.pem
-*.key
-*.crt
-*.csr
-ssl/
-certs/
-
-# Database data and backups
-*.sql
-*.dump
-*.backup
-database/
-data/
-
-# Logs
-*.log
-logs/
-log/
-
-# Docker volumes and data
-volumes/
-data/
-mail-data/
-mail-state/
-mail-logs/
-
-# Temporary files
-*.tmp
-*.temp
+# IDE and editor files
+.vscode/
+.idea/
 *.swp
 *.swo
 *~
@@ -57,43 +32,23 @@ mail-logs/
 ehthumbs.db
 Thumbs.db
 
-# IDE files
-.vscode/
-.idea/
-*.sublime-*
-.atom/
-
-# Node.js
-node_modules/
+# Logs
+logs
+*.log
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+lerna-debug.log*
 
-# Python
-__pycache__/
-*.py[cod]
-*$py.class
-*.so
-.Python
-env/
-venv/
-ENV/
-env.bak/
-venv.bak/
-
-# Backup files
-*.bak
-*.backup
-backup/
-old_scripts_backup/
-
-# Runtime files
+# Runtime data
+pids
 *.pid
 *.seed
 *.pid.lock
 
 # Coverage directory used by tools like istanbul
 coverage/
+*.lcov
 
 # nyc test coverage
 .nyc_output
@@ -104,6 +59,15 @@ jspm_packages/
 # Optional npm cache directory
 .npm
 
+# Optional eslint cache
+.eslintcache
+
+# Microbundle cache
+.rpt2_cache/
+.rts2_cache_cjs/
+.rts2_cache_es/
+.rts2_cache_umd/
+
 # Optional REPL history
 .node_repl_history
 
@@ -113,31 +77,94 @@ jspm_packages/
 # Yarn Integrity file
 .yarn-integrity
 
-# dotenv environment variables file
-.env.test
-.env.development
-
 # parcel-bundler cache (https://parceljs.org/)
 .cache
 .parcel-cache
 
-# next.js build output
+# Next.js build output
 .next
 
-# nuxt.js build output
+# Nuxt.js build / generate output
 .nuxt
+dist
 
-# vuepress build output
-.vuepress/dist
+# Gatsby files
+.cache/
+public
 
-# Serverless directories
-.serverless
+# Storybook build outputs
+.out
+.storybook-out
 
-# FuseBox cache
-.fusebox/
+# Temporary folders
+tmp/
+temp/
 
-# DynamoDB Local files
-.dynamodb/
+# Docker
+.dockerignore
 
-# TernJS port file
-.tern-port 
+# SSL certificates
+*.pem
+*.key
+*.crt
+*.csr
+ssl/
+
+# Database files
+*.db
+*.sqlite
+*.sqlite3
+
+# Backup files
+*.bak
+*.backup
+*.old
+
+# Test files
+test-results/
+playwright-report/
+test-results.xml
+
+# Performance monitoring
+.nyc_output/
+
+# Local development
+.local/
+
+# Secrets and sensitive files
+secrets/
+config/secrets.json
+*.secret
+secrets.json
+
+# API keys and credentials
+api-keys.json
+credentials.json
+auth.json
+
+# Internal documentation with sensitive information
+internal_docs/
+
+# Server setup scripts with credentials
+serversetup/
+fix_gmail_tls.sh
+
+# Local configuration
+config.local.js
+settings.local.js
+
+# Debug files
+debug.log
+debug-*.log
+
+# Cache directories
+.cache/
+cache/
+
+# Build artifacts
+artifacts/
+builds/
+
+# Package manager lock files (optional - uncomment if you want to ignore them)
+# package-lock.json
+# yarn.lock 

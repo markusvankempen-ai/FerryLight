@@ -103,7 +103,7 @@ temp/
 # Docker
 .dockerignore
 
-# SSL certificates
+# SSL certificates and keys
 *.pem
 *.key
 *.crt
@@ -144,14 +144,23 @@ auth.json
 
 # Internal documentation with sensitive information
 internal_docs/
+internal_docs copy/
+**/internal_docs/
+**/internal_docs*/
+docs/internal/
+private_docs/
+confidential/
 
 # Server setup scripts with credentials
 serversetup/
 fix_gmail_tls.sh
+**/serversetup/
+setup_*.sh
 
 # Local configuration
 config.local.js
 settings.local.js
+local.config.js
 
 # Debug files
 debug.log
@@ -164,6 +173,37 @@ cache/
 # Build artifacts
 artifacts/
 builds/
+
+# Email and mail server configuration
+mail_config/
+mail_setup/
+**/mail_server*/
+**/email_config/
+
+# Database access and credentials
+**/postgresql_access/
+**/database_config/
+db_credentials/
+
+# Authentication and security
+**/auth_config/
+**/security_setup/
+auth_keys/
+
+# Private scripts and setup files
+private/
+setup/internal/
+admin/
+**/admin_setup/
+
+# Deployment credentials
+deploy_keys/
+deployment_secrets/
+production_config/
+
+# Monitoring and analytics with credentials  
+monitoring_config/
+analytics_keys/
 
 # Package manager lock files (optional - uncomment if you want to ignore them)
 # package-lock.json

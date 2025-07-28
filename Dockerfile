@@ -4,17 +4,24 @@ FROM node:18-alpine AS builder
 # Set working directory
 WORKDIR /app
 
-# Copy package files
+# Copy package files first for better caching
 COPY package*.json ./
 
 # Install all dependencies (including dev dependencies for build)
 RUN npm ci
 
-# Copy source code
-COPY . .
+# Copy public directory and other necessary files
+COPY public/ ./public/
+COPY src/ ./src/
+COPY scripts/ ./scripts/
 
-# Build the React app
-RUN npm run build
+# Copy other build-related files
+COPY server.js ./
+COPY nginx.conf ./
+COPY env.example ./
+
+# Build the React app (skip favicon generation for Docker)
+RUN npm run build:docker
 
 # Production stage
 FROM node:18-alpine

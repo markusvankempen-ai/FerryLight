@@ -3,11 +3,16 @@ version: '3.8'
 services:
   # FerryLight Express.js server (serves React app and API proxy)
   ferrylight-app:
-    build: .
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        - NODE_ENV=production
     container_name: ferrylight-website
     restart: unless-stopped
     environment:
       - NODE_ENV=production
+      - PORT=3001
       # API credentials - set these in .env file
       - REACT_APP_API_USERNAME=${REACT_APP_API_USERNAME}
       - REACT_APP_API_PASSWORD=${REACT_APP_API_PASSWORD}
@@ -15,10 +20,15 @@ services:
       - REACT_APP_WEATHER_API_URL=${REACT_APP_WEATHER_API_URL:-https://nodered.ferrylight.online/rbweather}
       - REACT_APP_ADMIN_USERNAME=${REACT_APP_ADMIN_USERNAME:-admin}
       - REACT_APP_ADMIN_PASSWORD=${REACT_APP_ADMIN_PASSWORD:-ferrylight2025}
+      # Debug settings
+      - REACT_APP_DEBUG_MODE=${REACT_APP_DEBUG_MODE:-false}
+      - REACT_APP_LOG_LEVEL=${REACT_APP_LOG_LEVEL:-info}
     expose:
       - "3001"
     volumes:
       - ./logs:/app/logs
+      # Mount .env file if it exists (for runtime config)
+      - ./.env:/app/.env:ro
     networks:
       - ferrylight-network
     healthcheck:
@@ -31,12 +41,13 @@ services:
   # Nginx reverse proxy for SSL termination and load balancing
   nginx-proxy:
     image: nginx:alpine
+    container_name: ferrylight-nginx
     ports:
       - "80:80"
       - "443:443"
     volumes:
-      - ./nginx-proxy.conf:/etc/nginx/nginx.conf
-      - ./ssl:/etc/nginx/ssl
+      - ./nginx-proxy.conf:/etc/nginx/nginx.conf:ro
+      - ./ssl:/etc/nginx/ssl:ro
       - ./logs/nginx:/var/log/nginx
     depends_on:
       ferrylight-app:
@@ -44,19 +55,29 @@ services:
     restart: unless-stopped
     networks:
       - ferrylight-network
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost/nginx-health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
 
   # Optional: Add Redis for caching (future enhancement)
   redis-cache:
     image: redis:7-alpine
     container_name: ferrylight-cache
     restart: unless-stopped
-    command: redis-server --appendonly yes
+    command: redis-server --appendonly yes --maxmemory 256mb --maxmemory-policy allkeys-lru
     volumes:
       - redis-data:/data
     networks:
       - ferrylight-network
     profiles:
       - cache
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
 
   # Optional: Add Postgres for logging/analytics (future enhancement)
   postgres-analytics:
@@ -66,19 +87,28 @@ services:
     environment:
       - POSTGRES_DB=ferrylight
       - POSTGRES_USER=ferrylight
-      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-changeme}
+      - POSTGRES_INITDB_ARGS=--auth-host=scram-sha-256
     volumes:
       - postgres-data:/var/lib/postgresql/data
-      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql:ro
     networks:
       - ferrylight-network
     profiles:
       - analytics
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ferrylight -d ferrylight"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
 
 networks:
   ferrylight-network:
     driver: bridge
+    name: ferrylight-network
 
 volumes:
   redis-data:
-  postgres-data: 
+    name: ferrylight-redis-data
+  postgres-data:
+    name: ferrylight-postgres-data 

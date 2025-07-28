@@ -105,21 +105,30 @@ docker-compose up -d ferrylight-app nginx-proxy
 
 # Wait for services to be healthy
 print_status "Waiting for services to be ready..."
-timeout=60
+timeout=90
 counter=0
 
 while [ $counter -lt $timeout ]; do
-    if docker-compose ps | grep -q "healthy"; then
+    # Check if both main services are healthy
+    app_healthy=$(docker inspect --format='{{.State.Health.Status}}' ferrylight-website 2>/dev/null || echo "starting")
+    nginx_healthy=$(docker inspect --format='{{.State.Health.Status}}' ferrylight-nginx 2>/dev/null || echo "starting")
+    
+    if [ "$app_healthy" = "healthy" ] && [ "$nginx_healthy" = "healthy" ]; then
+        print_success "All services are healthy!"
         break
     fi
+    
     echo -n "."
-    sleep 2
-    counter=$((counter + 2))
+    sleep 3
+    counter=$((counter + 3))
 done
 
 if [ $counter -ge $timeout ]; then
     print_error "Services failed to start within $timeout seconds."
-    docker-compose logs
+    print_status "Service status:"
+    docker-compose ps
+    print_status "Recent logs:"
+    docker-compose logs --tail=20
     exit 1
 fi
 

@@ -99,14 +99,29 @@ A modern React web application providing real-time ferry status, wait times, and
 3. **Configure environment**
    ```bash
    # Copy the example environment file
-   cp .env.example .env.local
+   cp env.example .env
    
-   # Edit .env.local with your API credentials
-   # REACT_APP_API_USERNAME=your_username
-   # REACT_APP_API_PASSWORD=your_password
-   # REACT_APP_FERRY_API_URL=your_ferry_api_url
-   # REACT_APP_WEATHER_API_URL=your_weather_api_url
+   # Edit .env with your actual API credentials
+   # You need to get these from your API provider or server administrator
+   nano .env
    ```
+   
+   **Required Environment Variables:**
+   ```bash
+   # API Credentials - REQUIRED for production
+   REACT_APP_API_USERNAME=your_actual_username
+   REACT_APP_API_PASSWORD=your_actual_password
+   
+   # API Endpoints (these are already correct)
+   REACT_APP_FERRY_API_URL=https://nodered.ferrylight.online/rbferry
+   REACT_APP_WEATHER_API_URL=https://nodered.ferrylight.online/rbweather
+   
+   # Admin Login (change for security)
+   REACT_APP_ADMIN_USERNAME=admin
+   REACT_APP_ADMIN_PASSWORD=ferrylight2025
+   ```
+   
+   **⚠️ Important:** The app will show 401 Unauthorized errors until you set the correct API credentials!
 
 4. **Start development server**
    ```bash
@@ -278,6 +293,57 @@ npm test -- --watch
 - **First Contentful Paint**: < 2 seconds
 - **Largest Contentful Paint**: < 3 seconds
 - **Cumulative Layout Shift**: < 0.1
+
+## 🔧 Troubleshooting
+
+### Common Issues
+
+#### 401 Unauthorized Errors
+If you see `GET https://nodered.ferrylight.online/rbferry 401 (Unauthorized)` errors:
+
+1. **Check Environment Variables**
+   ```bash
+   # Make sure you have a .env file with correct credentials
+   cat .env
+   ```
+
+2. **Verify API Credentials**
+   - Contact your API provider for correct username/password
+   - Ensure credentials are properly formatted in `.env` file
+   - Check that the API endpoints are accessible
+
+3. **Test API Connectivity**
+   ```bash
+   # Test the API directly (replace with your credentials)
+   curl -u "your_username:your_password" https://nodered.ferrylight.online/rbferry
+   ```
+
+4. **Development vs Production**
+   - Development: Uses `.env` file in project root
+   - Production: Set environment variables in your hosting platform
+
+#### Build Errors
+- **Node Version**: Ensure you're using Node.js 18.x or higher
+- **Dependencies**: Run `npm install` to install missing packages
+- **Port Conflicts**: Change port if 3000 is in use: `PORT=3001 npm start`
+
+#### Docker Issues
+- **Permission Errors**: Run Docker commands with `sudo` if needed
+- **Port Conflicts**: Change ports in `docker-compose.yml`
+- **Build Failures**: Check Docker logs: `docker-compose logs`
+
+### Debug Mode
+Enable debug logging by setting in your `.env`:
+```bash
+REACT_APP_DEBUG_MODE=true
+REACT_APP_LOG_LEVEL=debug
+```
+
+### Getting Help
+1. Check the browser console for detailed error messages
+2. Review the [Contributing Guidelines](CONTRIBUTING.md)
+3. Open an issue on GitHub with error details
+4. Contact: markus.van.kempen@gmail.com
 
 ## 🤝 Contributing
 
